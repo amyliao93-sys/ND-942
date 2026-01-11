@@ -80,9 +80,61 @@
         <textarea id="dreamInput" placeholder="描述夢境..."></textarea>
 
         <div class="options-grid">
-            <div><label>ENTITIES:</label><select id="dreamPeople"><option value="None">無</option><option value="Family">家人</option><option value="Unknown">未知</option></select></div>
-            <div><label>LOCATION:</label><select id="dreamLocation"><option value="Unknown">未知</option><option value="School">學校</option><option value="Home">家</option></select></div>
-            <div><label>TYPE:</label><select id="dreamType"><option value="Normal">一般</option><option value="Nightmare">惡夢</option></select></div>
+           <div>
+    <label>ENTITIES (人物):</label>
+    <select id="dreamPeople">
+        <option value="None (無)">無 (None)</option>
+        
+        <optgroup label="=== 親屬關係 ===">
+            <option value="Family_Elders (家族長輩)">家族長輩</option>
+            <option value="Family_Juniors (晚輩)">晚輩</option>
+            <option value="Relatives (親戚)">其他親戚</option>
+        </optgroup>
+
+        <optgroup label="=== 社交關係 ===">
+            <option value="Friends (朋友)">朋友</option>
+            <option value="Classmates (同學)">同學</option>
+            <option value="Colleagues (同事)">同事</option>
+        </optgroup>
+
+        <optgroup label="=== 其他 ===">
+            <option value="Passersby (路人)">路人</option>
+            <option value="Strangers (陌生人)">陌生人</option>
+            <option value="Unknown (未知)">未知</option>
+        </optgroup>
+    </select>
+</div>
+            <div>
+    <label>LOCATION (地點):</label>
+    <select id="dreamLocation">
+        <option value="Unknown (未知)">未知 (Unknown)</option>
+        <option value="Home (家)">家 (Home)</option>
+        <option value="School (學校)">學校 (School)</option>
+        
+        <option value="Workplace (辦公室/職場)">辦公室/職場 (Workplace)</option>
+        <option value="Old_House (老家/舊居)">老家/舊居 (Childhood Home)</option>
+        <option value="Nature_Forest (森林/自然)">森林/自然 (Nature)</option>
+        <option value="City_Street (城市/街道)">城市/街道 (City)</option>
+        <option value="Ocean_Water (海洋/水域)">海洋/水域 (Water)</option>
+        <option value="Transportation (交通工具-車/火車)">交通工具 (Transport)</option>
+        <option value="Elevator_Stairs (電梯/樓梯)">電梯/樓梯 (Elevator/Stairs)</option>
+        <option value="Hospital (醫院)">醫院 (Hospital)</option>
+        <option value="Shopping_Mall (商場/百貨)">商場 (Mall)</option>
+        <option value="Restroom (廁所)">廁所 (Restroom)</option>
+    </select>
+</div>
+
+<div>
+    <label>TYPE (類型):</label>
+    <select id="dreamType">
+        <option value="Absurd_Logic (荒謬內容)">荒謬內容 (Absurd)</option>
+        <option value="Unfinished_Business (沒處理完的事)">沒處理完的事 (Unfinished)</option>
+        <option value="Emotional_Release (情緒發洩)">情緒發洩 (Catharsis)</option>
+        <option value="Memory_Fragmentation (記憶亂整理)">記憶亂整理 (Memory Sorting)</option>
+        <option value="Relationship_Attachment (關係依附)">關係依附 (Attachment)</option>
+        <option value="Stuck_Paralysis (卡住/動彈不得)">卡住 (Stuck)</option>
+    </select>
+</div>
         </div>
 
         <button onclick="startAnalysis()">[ UPLOAD_TO_CORE ]</button>
@@ -177,4 +229,5 @@
 </script>
 
 </body>
+
 </html>
