@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ND // NEURO-DIVE FINAL</title>
+    <style>
+        /* --- CSS: Cyberpunk 視覺核心 --- */
+        body {
+            background-color: #050505;
+            color: #00FF41;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .container { max-width: 900px; margin: 0 auto; border: 1px solid #333; padding: 20px; box-shadow: 0 0 20px rgba(0, 255, 65, 0.1); }
+        h1 { border-bottom: 2px solid #00FF41; padding-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        
+        /* 輸入區樣式 */
+        label { display: block; margin-top: 15px; margin-bottom: 5px; font-weight: bold; color: #00FF41; }
+        textarea, select {
+            width: 100%; background: #080808; color: #00FF41; border: 1px solid #00FF41;
+            font-family: inherit; padding: 10px; box-sizing: border-box; outline: none; font-size: 1rem;
+        }
+        textarea { height: 100px; }
+        
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        
+        button {
+            width: 100%; background: #000; color: #00FF41; border: 1px solid #00FF41;
+            padding: 15px; margin-top: 20px; cursor: pointer; font-weight: bold; font-size: 1.2rem;
+            text-transform: uppercase; transition: 0.2s;
+        }
+        button:hover { background: #00FF41; color: #000; box-shadow: 0 0 15px #00FF41; }
+
+        /* --- 結果顯示區 --- */
+        #result-area { margin-top: 30px; display: none; border-top: 2px solid #00FF41; padding-top: 20px; }
+        
+        /* 壓力條特效 */
+        .stress-container { margin-bottom: 15px; }
+        .stress-bar-bg { width: 100%; background: #111; height: 20px; border: 1px solid #333; }
+        .stress-bar-fill { height: 100%; background: #FF0055; width: 0%; transition: width 1.5s ease-out; box-shadow: 0 0 10px #FF0055; }
+        .stress-text { color: #FF0055; font-size: 1.5rem; font-weight: bold; }
+
+        /* 圖片容器 */
+        .glitch-img-container {
+            width: 100%; border: 1px solid #00FF41; min-height: 200px; background: #000;
+            display: flex; align-items: center; justify-content: center; margin-bottom: 20px; overflow: hidden;
+        }
+        img { max-width: 100%; display: block; opacity: 0; transition: opacity 1s; }
+        
+        /* 關鍵字顯示區 (直接顯示文字) */
+        .keywords-box { 
+            margin-bottom: 20px; 
+            padding: 10px; 
+            border: 1px dashed #00FFFF; 
+            color: #00FFFF;
+            font-size: 1.1rem;
+        }
+        .keywords-label { font-size: 0.8rem; color: #555; display: block; margin-bottom: 5px; }
+
+        /* 分析日誌 */
+        .log-box { white-space: pre-wrap; line-height: 1.6; color: #ddd; border-left: 3px solid #00FF41; padding-left: 15px; }
+
+        /* Loading */
+        .loading { animation: blink 0.5s infinite; display: none; margin-top: 10px; color: #FF0055; }
+        @keyframes blink { 0% {opacity: 1;} 50% {opacity: 0.3;} 100% {opacity: 1;} }
+
+        @media (max-width: 600px) { .options-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>ND // NEURO-DIVE v7.0</h1>
+    
+    <div class="input-section">
+        <label>> INPUT_DREAM_SEQUENCE:</label>
+        <textarea id="dreamInput" placeholder="描述夢境..."></textarea>
+
+        <div class="options-grid">
+            <div><label>ENTITIES:</label><select id="dreamPeople"><option value="None">無</option><option value="Family">家人</option><option value="Unknown">未知</option></select></div>
+            <div><label>LOCATION:</label><select id="dreamLocation"><option value="Unknown">未知</option><option value="School">學校</option><option value="Home">家</option></select></div>
+            <div><label>TYPE:</label><select id="dreamType"><option value="Normal">一般</option><option value="Nightmare">惡夢</option></select></div>
+        </div>
+
+        <button onclick="startAnalysis()">[ UPLOAD_TO_CORE ]</button>
+        <div class="loading" id="loadingText">>> PROCESSING... (WAIT: ~30s)</div>
+    </div>
+
+    <div id="result-area">
+        <div class="stress-container">
+            <div>STRESS_LEVEL: <span id="stressVal" class="stress-text">0</span>%</div>
+            <div class="stress-bar-bg"><div id="stressFill" class="stress-bar-fill"></div></div>
+        </div>
+
+        <div class="keywords-box">
+            <span class="keywords-label">> DETECTED_KEYWORDS:</span>
+            <span id="keywordText">...</span>
+        </div>
+
+        <div class="glitch-img-container">
+            <span id="img-placeholder">WAITING_FOR_DATA...</span>
+            <img id="resultImg" src="" onload="this.style.opacity=1; document.getElementById('img-placeholder').style.display='none'">
+        </div>
+        
+        <p>> ANALYSIS_LOG:</p>
+        <div class="log-box" id="logText"></div>
+    </div>
+</div>
+
+<script>
+    // ⚠️ 請換成您的 n8n Webhook 網址
+    const N8N_WEBHOOK_URL = "https://s2004121710.app.n8n.cloud/webhook/08005730-69fb-4893-aef5-0380f9154554"; 
+
+    async function startAnalysis() {
+        const content = document.getElementById('dreamInput').value;
+        if(!content) { alert("ERROR: NO DATA"); return; }
+
+        document.getElementById('loadingText').style.display = 'block';
+        document.getElementById('result-area').style.display = 'none';
+
+        const payload = {
+            "action": "save",
+            "user_id": "psycho_student_01",
+            "dream_content": content,
+            "dream_people": document.getElementById('dreamPeople').value,
+            "dream_location": document.getElementById('dreamLocation').value,
+            "dream_type": document.getElementById('dreamType').value
+        };
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 90000); 
+
+        try {
+            const response = await fetch(N8N_WEBHOOK_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (!response.ok) throw new Error("Server Error");
+            
+            // 關鍵修改 1: 直接接收物件，不是陣列
+            const data = await response.json(); 
+
+            // --- 渲染資料 (Rendering) ---
+
+            document.getElementById('loadingText').style.display = 'none';
+            document.getElementById('result-area').style.display = 'block';
+
+            // 1. 分析文本
+            document.getElementById('logText').innerText = data.analysis_log || "LOG_MISSING";
+
+            // 2. 壓力數值
+            const score = data.stress_score || 0;
+            document.getElementById('stressVal').innerText = score;
+            document.getElementById('stressFill').style.width = score + "%";
+
+            // 3. 圖片 (關鍵修改: 直接塞 Base64 字串)
+            // 確保後端傳來的是 "data:image/png;base64,..." 格式
+            if (data.image_url) {
+                document.getElementById('resultImg').src = data.image_url;
+            }
+
+            // 4. 關鍵字 (關鍵修改: 直接顯示後端排版好的字串)
+            document.getElementById('keywordText').innerText = data.keywords || "NONE";
+
+        } catch (error) {
+            console.error(error);
+            document.getElementById('loadingText').innerText = "ERROR: " + error.message;
+        }
+    }
+</script>
+
+</body>
+</html>
